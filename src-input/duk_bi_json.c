@@ -1308,11 +1308,17 @@ DUK_LOCAL void duk__enc_quote_string(duk_json_enc_ctx *js_ctx, duk_hstring *h_st
 				 * (or end of input) and emit just one replacement codepoint.
 				 */
 
-				p_tmp = p;
-				if (!duk_unicode_decode_xutf8(thr, &p, p_start, p_end, &cp)) {
-					/* Decode failed. */
-					cp = *p_tmp;
-					p = p_tmp + 1;
+				if (js_ctx->flag_gbk) {
+					cp = *(duk_uint16_t *)p;
+					p += 2;
+				}
+				else {
+					p_tmp = p;
+					if (!duk_unicode_decode_xutf8(thr, &p, p_start, p_end, &cp)) {
+						/* Decode failed. */
+						cp = *p_tmp;
+						p = p_tmp + 1;
+					}
 				}
 
 #if defined(DUK_USE_NONSTD_JSON_ESC_U2028_U2029)
@@ -1323,7 +1329,13 @@ DUK_LOCAL void duk__enc_quote_string(duk_json_enc_ctx *js_ctx, duk_hstring *h_st
 					q = duk__emit_esc_auto_fast(js_ctx, cp, q);
 				} else {
 					/* as is */
-					DUK_RAW_WRITE_XUTF8(q, cp);
+					if (js_ctx->flag_gbk) {
+						*(duk_uint16_t *)q = (duk_uint16_t)cp;
+						q += 2;
+					}
+					else {
+						DUK_RAW_WRITE_XUTF8(q, cp);
+					}
 				}
 			}
 		}
@@ -2937,6 +2949,7 @@ void duk_bi_json_stringify_helper(duk_hthread *thr,
 	js_ctx->flags = flags;
 	js_ctx->flag_ascii_only = flags & DUK_JSON_FLAG_ASCII_ONLY;
 	js_ctx->flag_avoid_key_quotes = flags & DUK_JSON_FLAG_AVOID_KEY_QUOTES;
+	js_ctx->flag_gbk = flags & DUK_JSON_FLAG_GBK;
 #if defined(DUK_USE_JX)
 	js_ctx->flag_ext_custom = flags & DUK_JSON_FLAG_EXT_CUSTOM;
 #endif

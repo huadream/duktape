@@ -10,6 +10,7 @@
 #define DUK_JSON_FLAG_AVOID_KEY_QUOTES        (1U << 1)  /* avoid key quotes when key is an ASCII Identifier */
 #define DUK_JSON_FLAG_EXT_CUSTOM              (1U << 2)  /* extended types: custom encoding */
 #define DUK_JSON_FLAG_EXT_COMPATIBLE          (1U << 3)  /* extended types: compatible encoding */
+#define DUK_JSON_FLAG_GBK		              (1U << 4)  /* extended types: compatible encoding */
 
 /* How much stack to require on entry to object/array encode */
 #define DUK_JSON_ENC_REQSTACK                 32
@@ -31,6 +32,7 @@ typedef struct {
 	duk_small_uint_t flags;
 	duk_small_uint_t flag_ascii_only;
 	duk_small_uint_t flag_avoid_key_quotes;
+	duk_small_uint_t flag_gbk;
 #if defined(DUK_USE_JX) || defined(DUK_USE_JC)
 	duk_small_uint_t flag_ext_custom;
 	duk_small_uint_t flag_ext_compatible;

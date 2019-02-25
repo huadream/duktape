@@ -895,6 +895,32 @@ DUK_EXTERNAL void duk_json_decode(duk_hthread *thr, duk_idx_t idx) {
 
 	DUK_ASSERT(duk_get_top(thr) == top_at_entry);
 }
+
+DUK_EXTERNAL const char *duk_json_encode_flags(duk_hthread *thr, duk_idx_t idx, duk_small_uint_t flags) {
+#if defined(DUK_USE_ASSERTIONS)
+	duk_idx_t top_at_entry;
+#endif
+	const char *ret;
+
+	DUK_ASSERT_API_ENTRY(thr);
+#if defined(DUK_USE_ASSERTIONS)
+	top_at_entry = duk_get_top(thr);
+#endif
+
+	idx = duk_require_normalize_index(thr, idx);
+	duk_bi_json_stringify_helper(thr,
+		idx /*idx_value*/,
+		DUK_INVALID_INDEX /*idx_replacer*/,
+		DUK_INVALID_INDEX /*idx_space*/,
+		flags /*flags*/);
+	DUK_ASSERT(duk_is_string(thr, -1));
+	duk_replace(thr, idx);
+	ret = duk_get_string(thr, idx);
+
+	DUK_ASSERT(duk_get_top(thr) == top_at_entry);
+
+	return ret;
+}
 #else  /* DUK_USE_JSON_SUPPORT */
 DUK_EXTERNAL const char *duk_json_encode(duk_hthread *thr, duk_idx_t idx) {
 	DUK_ASSERT_API_ENTRY(thr);
